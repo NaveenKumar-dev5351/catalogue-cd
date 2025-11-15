@@ -15,6 +15,7 @@ pipeline {
     }
     parameters {
         string(name: 'appVersion', description: 'Image version of the application')
+        choice(name: 'deploy_to', choices: ['dev', 'qa', 'prod'] description: 'pick the environment')
     }
     //build
     stages {
@@ -22,7 +23,10 @@ pipeline {
             steps {
                 script {
                     withAWS (credentials : 'aws_creds', region: 'us-east-1') {
-                        
+                        sh """
+                        aws eks update-kubeconfig --region $REGION --name "$PROJECT-${params.deploy_to}"
+                        kubectl get nodes
+                        """
                     }
                 }
             }
